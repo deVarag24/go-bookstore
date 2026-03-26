@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"math/rand"
 
 	"github.com/deVarag24/go-bookstore/pkg/models"
 	"github.com/deVarag24/go-bookstore/pkg/repository"
@@ -31,7 +30,6 @@ func (s *bookStoreService) CreateBook(name, author string, price float64) (*mode
 		Name:   name,
 		Author: author,
 		Price:  price,
-		ID:     uint(rand.Intn(10000)),
 	}
 
 	err := s.booksRepo.CreateBook(book)

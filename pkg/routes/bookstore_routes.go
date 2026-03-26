@@ -6,7 +6,7 @@ import (
 )
 
 func RegisterBookStoreRoutes(routes fiber.Router, controller controllers.BookStoreController) {
-	bookStoreRoute := routes.Group("/book")
+	bookStoreRoute := routes.Group("/books")
 
 	bookStoreRoute.Post("/", controller.CreateBook)
 	bookStoreRoute.Get("/", controller.GetBooks)

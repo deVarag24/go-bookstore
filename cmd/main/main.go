@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/deVarag24/go-bookstore/pkg/config"
 	dicontainer "github.com/deVarag24/go-bookstore/pkg/diContainer"
 	"github.com/deVarag24/go-bookstore/pkg/models"
@@ -23,8 +21,7 @@ func main() {
 	setupRoutes(app)
 
 	// Start the server
-	go app.Listen(":3000")
-	fmt.Println("Server is running on port 3000")
+	app.Listen(":3000")
 }
 
 func migerateEntities() {
