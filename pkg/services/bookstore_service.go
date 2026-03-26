@@ -6,6 +6,7 @@ import (
 
 	"github.com/deVarag24/go-bookstore/pkg/models"
 	"github.com/deVarag24/go-bookstore/pkg/repository"
+	txmanager "github.com/deVarag24/go-bookstore/pkg/utils/txManager"
 )
 
 type BookStoreService interface {
@@ -18,10 +19,11 @@ type BookStoreService interface {
 
 type bookStoreService struct {
 	booksRepo repository.BooksRepository
+	txManager txmanager.TxManager
 }
 
-func NewBookStoreService(booksRepo repository.BooksRepository) BookStoreService {
-	return &bookStoreService{booksRepo: booksRepo}
+func NewBookStoreService(booksRepo repository.BooksRepository, txManager txmanager.TxManager) BookStoreService {
+	return &bookStoreService{booksRepo: booksRepo, txManager: txManager}
 }
 
 func (s *bookStoreService) CreateBook(name, author string, price float64) (*models.Book, error) {
@@ -63,11 +65,22 @@ func (s *bookStoreService) GetBookByID(id uint) (*models.Book, error) {
 }
 
 func (s *bookStoreService) UpdateBook(book *models.Book) error {
-	err := s.booksRepo.UpdateBook(book)
-	if err != nil {
-		return errors.New("failed to update book: " + err.Error())
-	}
-	return nil
+	return s.txManager.WithTransaction(func(uow txmanager.UnitOfWork) error {
+		existingBook, err := uow.Books().GetBookByID(book.ID)
+		if err != nil {
+			return errors.New("book not found: " + err.Error())
+		}
+
+		existingBook.Name = book.Name
+		existingBook.Author = book.Author
+		existingBook.Price = book.Price
+
+		err = uow.Books().UpdateBook(existingBook)
+		if err != nil {
+			return errors.New("failed to update book: " + err.Error())
+		}
+		return nil
+	})
 }
 
 func (s *bookStoreService) DeleteBook(id uint) error {
